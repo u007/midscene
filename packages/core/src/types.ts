@@ -324,6 +324,20 @@ export interface PlanningAIResponse {
   yamlString?: string;
 }
 
+export type AICommandAction = 'click' | 'doubleClick';
+export type AICommandSelectorType = 'id' | 'css'; // Can be extended later
+
+export interface AICommandSelector {
+  type: AICommandSelectorType;
+  value: string;
+}
+
+export interface AICommand {
+  action: AICommandAction;
+  selector: AICommandSelector;
+  fullCommand: string; // To store the original natural language command
+}
+
 // export interface PlanningFurtherPlan {
 //   whatToDoNext: string;
 //   log: string;
@@ -391,6 +405,7 @@ export type ExecutionTaskType = 'Planning' | 'Insight' | 'Action' | 'Assertion';
 export interface ExecutorContext {
   task: ExecutionTask;
   element?: LocateResultElement | null;
+  page?: AbstractPage; 
 }
 
 export interface TaskCacheInfo {
