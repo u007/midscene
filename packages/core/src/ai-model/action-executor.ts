@@ -6,9 +6,14 @@ import type {
   ExecutionTaskProgressOptions,
   ExecutionTaskReturn,
   ExecutorContext,
+  AICommand,
+  AICommandSelector,
+  AbstractPage, // Ensured AbstractPage is imported
 } from '@/types';
 import { getVersion } from '@/utils';
 import { MIDSCENE_MODEL_NAME, getAIConfig } from '@midscene/shared/env';
+import { parseAICommand } from './command-parser';
+// WebElementInfo is no longer needed with the new executor logic.
 import { assert } from '@midscene/shared/utils';
 
 export class Executor {
@@ -20,11 +25,13 @@ export class Executor {
   status: 'init' | 'pending' | 'running' | 'completed' | 'error';
 
   onTaskStart?: ExecutionTaskProgressOptions['onTaskStart'];
+  page?: AbstractPage; // Ensured page property is present
 
   constructor(
     name: string,
     options?: ExecutionTaskProgressOptions & {
       tasks?: ExecutionTaskApply[];
+      page?: AbstractPage; // Ensured page is in options
     },
   ) {
     this.status =
@@ -34,6 +41,7 @@ export class Executor {
       this.markTaskAsPending(item),
     );
     this.onTaskStart = options?.onTaskStart;
+    this.page = options?.page; // Ensured page is assigned
   }
 
   private markTaskAsPending(task: ExecutionTaskApply): ExecutionTask {
@@ -110,9 +118,10 @@ export class Executor {
         assert(executor, `executor is required for task type: ${task.type}`);
 
         let returnValue;
-        const executorContext: ExecutorContext = {
+        const executorContext: ExecutorContext = { // Ensured context creation includes page
           task,
           element: previousFindOutput?.element,
+          page: this.page, 
         };
 
         if (task.type === 'Insight') {
@@ -157,6 +166,7 @@ export class Executor {
         task.timing.cost = task.timing.end - task.timing.start;
         break;
       }
+      taskIndex++; 
     }
 
     // set all remaining tasks as cancelled
@@ -194,6 +204,65 @@ export class Executor {
     return null;
   }
 
+  async executeAICommand(naturalLanguageCommand: string): Promise<any> {
+    const command = parseAICommand(naturalLanguageCommand);
+
+    if (!command) {
+      console.error(`Failed to parse AI command: "${naturalLanguageCommand}"`);
+      // Or throw new Error(`Failed to parse AI command: "${naturalLanguageCommand}"`);
+      return;
+    }
+
+    const task: ExecutionTaskApply = {
+      type: 'Action',
+      subType: command.action === 'click' ? 'AIClick' : 'AIDoubleClick',
+      param: { selector: command.selector, fullCommand: command.fullCommand },
+      thought: `Executing AI Command: ${command.fullCommand}`,
+      executor: async (
+        param: { selector: AICommandSelector; fullCommand: string },
+        context: ExecutorContext, // context.page is now available
+      ) => {
+        if (!context.page) {
+          throw new Error("Page object not available in ExecutorContext for AI command execution.");
+        }
+
+        if (param.selector.type !== 'id') {
+          throw new Error(`Unsupported selector type: "${param.selector.type}". Only "id" is supported for AI commands.`);
+        }
+
+        // context.task should be available to determine the subType
+        if (!context.task || !context.task.subType) {
+            throw new Error("Task subtype not available in context for AI command execution.");
+        }
+
+        const actionSubType = context.task.subType;
+
+        if (actionSubType === 'AIClick') {
+          await context.page.clickById(param.selector.value);
+          return { 
+            output: { 
+              success: true, 
+              message: `Clicked element with ID: ${param.selector.value}` 
+            } 
+          };
+        } else if (actionSubType === 'AIDoubleClick') {
+          await context.page.doubleClickById(param.selector.value);
+          return { 
+            output: { 
+              success: true, 
+              message: `Double-clicked element with ID: ${param.selector.value}` 
+            } 
+          };
+        } else {
+          throw new Error(`Unsupported AI command action subType: "${actionSubType}"`);
+        }
+      },
+    };
+
+    await this.append(task);
+    return this.flush(); // Execute immediately
+  }
+
   dump(): ExecutionDump {
     const dumpData: ExecutionDump = {
       sdkVersion: getVersion(),
@@ -204,4 +273,7 @@ export class Executor {
     };
     return dumpData;
   }
+}
+  // No changes needed for executeAICommand, it will receive the context with page automatically
+  // ... (other methods like executeAICommand, dump) ...
 }

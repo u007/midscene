@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interaction Test Page</title>
+    <style>
+        .button { padding: 10px; margin: 5px; border: 1px solid black; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Interaction Tests</h1>
+    <div id="singleClickTarget" class="button">Single Click Me</div>
+    <div id="doubleClickTarget" class="button">Double Click Me</div>
+    <div id="statusArea" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
+        Status: Waiting for interaction...
+    </div>
+
+    <script>
+        const singleClickTarget = document.getElementById('singleClickTarget');
+        const doubleClickTarget = document.getElementById('doubleClickTarget');
+        const statusArea = document.getElementById('statusArea');
+
+        singleClickTarget.addEventListener('click', () => {
+            singleClickTarget.textContent = 'Single Clicked!';
+            statusArea.textContent = 'Status: Single click on "singleClickTarget"';
+            console.log('singleClickTarget clicked');
+        });
+
+        doubleClickTarget.addEventListener('dblclick', () => {
+            doubleClickTarget.textContent = 'Double Clicked!';
+            statusArea.textContent = 'Status: Double click on "doubleClickTarget"';
+            console.log('doubleClickTarget dblclicked');
+        });
+    </script>
+</body>
+</html>

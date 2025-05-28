@@ -338,4 +338,60 @@ export class Page<
   }
 
   async destroy(): Promise<void> {}
+
+  public async clickById(id: string): Promise<void> {
+    const selector = `#${id}`;
+    debugPage(`Attempting to click element with ID: ${id} using selector: ${selector}`);
+    try {
+      if (this.pageType === 'puppeteer') {
+        await (this.underlyingPage as PuppeteerPage).click(selector);
+      } else if (this.pageType === 'playwright') {
+        await (this.underlyingPage as PlaywrightPage).click(selector);
+      } else {
+        throw new Error(`Unsupported page type for clickById: ${this.pageType}`);
+      }
+      debugPage(`Successfully clicked element with ID: ${id}`);
+    } catch (error) {
+      console.error(`Failed to click element with ID "${id}":`, error);
+      throw new Error(`Failed to click element with ID "${id}": ${(error as Error).message}`);
+    }
+  }
+
+  public async doubleClickById(id: string): Promise<void> {
+    const selector = `#${id}`;
+    debugPage(`Attempting to double click element with ID: ${id} using selector: ${selector}`);
+    try {
+      if (this.pageType === 'puppeteer') {
+        // Puppeteer's `click` options can simulate a double click, 
+        // but dblclick is more direct if available and suits the requirement.
+        // Let's assume direct dblclick method or use click with count if not.
+        // Puppeteer actually has a `dblclick` method on elements, but not directly on page.
+        // The most common way is page.click(selector, { clickCount: 2 })
+        // However, the problem description implies a direct dblclick method.
+        // Checking puppeteer docs, page.click(selector, {clickCount: 2}) is the way for puppeteer.
+        // Let's re-evaluate this part.
+        // Okay, Puppeteer's Page class doesn't have a direct `dblclick` method.
+        // We should use `click` with `clickCount: 2`.
+        // The prompt says: "Use `this.underlyingPage.dblclick(selector)` ... Playwright's `page.dblclick()` and Puppeteer's `page.dblclick()` work this way."
+        // This is incorrect for Puppeteer's Page API. Puppeteer's ElementHandle has dblclick.
+        // Given the constraint, I will assume there's a misunderstanding in the prompt for Puppeteer
+        // or that a helper/extension method `dblclick` is expected to exist on `PuppeteerPage` type in this project.
+        // For safety and to adhere to standard Puppeteer Page API if no such extension exists,
+        // I will use `click` with `clickCount: 2` for Puppeteer.
+        // However, to strictly follow the prompt's implication of a direct `dblclick` method:
+        // await (this.underlyingPage as PuppeteerPage).dblclick(selector); // This would cause a runtime error if not defined.
+
+        // Correcting based on standard Puppeteer Page API:
+        await (this.underlyingPage as PuppeteerPage).click(selector, { clickCount: 2 });
+      } else if (this.pageType === 'playwright') {
+        await (this.underlyingPage as PlaywrightPage).dblclick(selector);
+      } else {
+        throw new Error(`Unsupported page type for doubleClickById: ${this.pageType}`);
+      }
+      debugPage(`Successfully double clicked element with ID: ${id}`);
+    } catch (error) {
+      console.error(`Failed to double click element with ID "${id}":`, error);
+      throw new Error(`Failed to double click element with ID "${id}": ${(error as Error).message}`);
+    }
+  }
 }

@@ -667,6 +667,7 @@ export class PageTaskExecutor {
   async loadYamlFlowAsPlanning(userInstruction: string, yamlString: string) {
     const taskExecutor = new Executor(taskTitleStr('Action', userInstruction), {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
 
     const task: ExecutionTaskPlanningApply = {
@@ -889,6 +890,7 @@ export class PageTaskExecutor {
   ): Promise<ExecutionResult> {
     const taskExecutor = new Executor(title, {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
     const { tasks } = await this.convertPlanToExecutable(plans);
     await taskExecutor.append(tasks);
@@ -912,6 +914,7 @@ export class PageTaskExecutor {
   > {
     const taskExecutor = new Executor(taskTitleStr('Action', userPrompt), {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
 
     let planningTask: ExecutionTaskPlanningApply | null =
@@ -995,6 +998,7 @@ export class PageTaskExecutor {
   > {
     const taskExecutor = new Executor(taskTitleStr('Action', userPrompt), {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
     this.conversationHistory = [];
     const isCompleted = false;
@@ -1061,6 +1065,7 @@ export class PageTaskExecutor {
       ),
       {
         onTaskStart: this.onTaskStartCallback,
+        page: this.page, // Added page
       },
     );
 
@@ -1132,6 +1137,7 @@ export class PageTaskExecutor {
     const description = `assert: ${assertion}`;
     const taskExecutor = new Executor(taskTitleStr('Assert', description), {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
     const assertionPlan: PlanningAction<PlanningActionParamAssert> = {
       type: 'Assert',
@@ -1209,6 +1215,7 @@ export class PageTaskExecutor {
     const description = `waitFor: ${assertion}`;
     const taskExecutor = new Executor(taskTitleStr('WaitFor', description), {
       onTaskStart: this.onTaskStartCallback,
+      page: this.page, // Added page
     });
     const { timeoutMs, checkIntervalMs } = opt;
 
