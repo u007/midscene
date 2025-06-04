@@ -319,3 +319,42 @@ You can use this [chrome extension](https://chromewebstore.google.com/detail/get
 ## More
 
 You may also be interested in [Prompting Tips](./prompting-tips)
+
+### Using AI Assertions for Validation
+
+You can leverage AI to perform complex validations on your UI directly within your YAML scripts. This goes beyond simple presence checks and allows for nuanced, context-aware assertions.
+
+**Defining an AI Assertion Step:**
+
+AI assertions are defined as an `Insight` task with the `subType` set to `Assert`.
+
+```yaml
+tasks:
+  - name: Check Shopping Cart Status
+    flow:
+      # ... other actions like adding items to cart ...
+      - type: Insight
+        subType: Assert
+        param:
+          assertion: "The shopping cart should indicate 2 items and the total price should be approximately $50."
+          # Optional: Override global AI model configuration for this specific assertion
+          aiModelConfig:
+            isUITars: false # Example: specify if a UI Tars model behavior is needed
+            # modelFamily: 'openai' # Example: specify model family if needed
+```
+
+**How it Works:**
+
+When this step is executed:
+1. The system captures the current state of the UI (screenshot, element structure, etc.). This `uiContext` is implicitly provided by the test runner at runtime.
+2. The natural language `assertion` from your YAML, along with the captured `uiContext`, is sent to an AI model via the `Validator` module.
+3. The AI evaluates whether the assertion holds true based on the visual and structural information of the UI.
+4. You can optionally provide an `aiModelConfig` within the `param` to customize AI behavior for that specific assertion, overriding any global configurations.
+
+**Interpreting Results:**
+
+The execution result for this step will indicate:
+- `pass: true` or `pass: false`: Whether the AI model validated or refuted your assertion.
+- `thought: "..."`: The AI's reasoning behind its decision. This is particularly insightful for failed assertions, helping you understand what the AI "saw" or "thought."
+
+This allows for more flexible and intelligent UI validation than traditional hardcoded checks. For more details on configuring the AI models used for these assertions, please refer to our guides on [choosing an AI model](./choose-a-model.mdx) and [model providers](./model-provider.mdx).

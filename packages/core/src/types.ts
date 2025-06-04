@@ -114,9 +114,14 @@ export interface AISectionLocatorResponse {
   error?: string;
 }
 
+/**
+ * Represents the response from an AI assertion.
+ */
 export interface AIAssertionResponse {
+  /** Whether the assertion passed or failed. */
   pass: boolean;
-  thought: string;
+  /** The AI's reasoning or thoughts behind the assertion result, can be null. */
+  thought: string | null;
 }
 
 export interface AIDescribeElementResponse {
@@ -505,8 +510,19 @@ export type ExecutionTaskInsightQuery =
 /*
 task - assertion
 */
+import type { AIModelConfig } from './ai-model/validator';
+
+/**
+ * Parameters for an insight task with subType 'Assert'.
+ * Defines the assertion to be validated against a UI context.
+ */
 export interface ExecutionTaskInsightAssertionParam {
+  /** The natural language assertion string to be validated. */
   assertion: string;
+  /** The UI context (screenshot, element tree, etc.) against which the assertion is made. */
+  uiContext: UIContext;
+  /** Optional AI model configuration to override default or globally set configurations for this specific assertion. */
+  aiModelConfig?: AIModelConfig;
 }
 
 export type ExecutionTaskInsightAssertionApply = ExecutionTaskApply<
