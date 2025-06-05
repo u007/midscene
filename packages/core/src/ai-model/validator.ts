@@ -94,14 +94,14 @@ export class Validator {
 
     const userMessageContent = [
       {
-        type: 'image_url',
+        type: 'image_url' as const,
         image_url: {
           url: imagePayload,
-          detail: 'high',
+          detail: 'high' as const,
         },
       },
       {
-        type: 'text',
+        type: 'text' as const,
         text: assertion, // The user's assertion
       },
     ];

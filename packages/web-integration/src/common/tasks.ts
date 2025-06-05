@@ -361,7 +361,7 @@ export class PageTaskExecutor {
                 );
               }
 
-              task.error = assertion.thought;
+              task.error = assertion.thought ?? undefined;
             }
 
             return {

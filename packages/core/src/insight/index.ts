@@ -329,8 +329,8 @@ export default class Insight<
       data: null,
       taskInfo,
       assertionPass: pass,
-      assertionThought: thought,
-      error: pass ? undefined : thought,
+      assertionThought: thought ?? undefined,
+      error: pass ? undefined : (thought ?? undefined),
     };
     emitInsightDump(dumpData, dumpSubscriber);
 
@@ -390,10 +390,10 @@ export default class Insight<
         role: 'user',
         content: [
           {
-            type: 'image_url',
+            type: 'image_url' as const,
             image_url: {
               url: imagePayload,
-              detail: 'high',
+              detail: 'high' as const,
             },
           },
         ],
